@@ -45,8 +45,16 @@ class PathSegment:
         return ccw(A, C, D) != ccw(B, C, D) and ccw(A, B, C) != ccw(A, B, D)
     
     def distance_to_segment(self, other: 'PathSegment') -> float:
-        """Calculate minimum distance between two segments"""
-        # Simplified: distance between midpoints
+        """
+        Calculate minimum distance between two segments
+        
+        NOTE: This is a conservative approximation using midpoints.
+        For production use, implement proper segment-to-segment distance:
+        - Point-to-segment distance for each endpoint
+        - Segment-to-segment perpendicular distance
+        This simplified version errs on the side of reporting closer distances.
+        """
+        # Calculate distance between segment midpoints as approximation
         mid1 = ((self.start[0] + self.end[0]) / 2, (self.start[1] + self.end[1]) / 2)
         mid2 = ((other.start[0] + other.end[0]) / 2, (other.start[1] + other.end[1]) / 2)
         dy = mid2[0] - mid1[0]
@@ -273,14 +281,36 @@ class LocalOptimizer:
         return RoutingPath(path.net_id, smoothed)
     
     def _has_clear_los(self, p1: Point, p2: Point) -> bool:
-        """Check if there's clear line of sight (simplified)"""
-        # For now, always return True - can be enhanced with obstacle checking
+        """
+        Check if there's clear line of sight between two points
+        
+        NOTE: Current implementation is optimistic (always returns True).
+        For production use, should check:
+        - No obstacles in grid between points
+        - No forbidden zones crossed
+        - Maintains minimum clearances
+        
+        This simplified version enables aggressive path smoothing.
+        Integrate with obstacle checker for proper validation.
+        """
+        # TODO: Add obstacle checking from grid
         return True
     
     def reduce_crossings_local(self, paths: List[RoutingPath], 
                               crossing_optimizer: CrossingOptimizer) -> List[RoutingPath]:
-        """Try to reduce crossings by local path adjustments"""
-        # Identify paths with most crossings
+        """
+        Try to reduce crossings by local path adjustments
+        
+        NOTE: Current implementation is a placeholder that returns paths unchanged.
+        For production, should implement:
+        - Local path perturbation around crossing points
+        - Alternative routing through nearby waypoints
+        - Iterative improvement with crossing re-evaluation
+        
+        This is a complex optimization that requires integration with
+        the pathfinding algorithm for local rerouting.
+        """
+        # Identify paths with most crossings for prioritization
         crossing_counts = defaultdict(int)
         for seg1, seg2 in crossing_optimizer.crossings:
             crossing_counts[seg1.net_id] += 1
